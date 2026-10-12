@@ -1,0 +1,32 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "currency": {
+      "type": "string"
+    },
+    "id": {
+      "type": "string"
+    },
+    "product_id": {
+      "type": "string"
+    },
+    "quantity": {
+      "type": "integer"
+    },
+    "status": {
+      "type": "string"
+    },
+    "total": {
+      "type": "number"
+    }
+  },
+  "required": [
+    "id",
+    "product_id",
+    "quantity",
+    "total",
+    "currency",
+    "status"
+  ],
+  "type": "object"
+}
