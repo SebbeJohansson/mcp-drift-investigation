@@ -1,0 +1,59 @@
+name: MCP drift check
+
+# Runs the detector against the mock API and shows the result in the job
+# summary. The run fails when drift is found: exit 2 means the MCP server
+# needs a code fix, exit 3 means an upstream problem for a human.
+on:
+  schedule:
+    - cron: "17 * * * *"
+  workflow_dispatch:
+    inputs:
+      chaos:
+        description: "Chaos switches to simulate upstream drift, space-separated (e.g. rename_field path_v2). Empty = healthy API."
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+concurrency:
+  group: drift-check
+
+jobs:
+  detect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+
+      - name: Build
+        run: go build -o bin/ ./cmd/...
+
+      - name: Start mock API
+        run: |
+          bin/mockapi -addr 127.0.0.1:8100 > mockapi.log 2>&1 &
+          for i in $(seq 1 50); do curl -sf http://127.0.0.1:8100/health > /dev/null && exit 0; sleep 0.2; done
+          echo "mock API did not start"; cat mockapi.log; exit 1
+
+      - name: Simulate upstream drift
+        if: inputs.chaos != ''
+        env:
+          CHAOS: ${{ inputs.chaos }}
+        run: |
+          bin/chaos $CHAOS
+          echo "> Simulated upstream drift: \`$CHAOS\`" >> "$GITHUB_STEP_SUMMARY"
+          echo >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Detect drift
+        run: bin/detector -mcp-cmd bin/mockmcp
+
+      - name: Upload drift event
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: drift-event
+          path: events/
+          if-no-files-found: ignore

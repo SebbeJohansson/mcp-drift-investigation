@@ -5,11 +5,12 @@
 //	go run ./cmd/detector -interval 1m         # poll
 //
 // Each new drift is written to <out>/<fingerprint>.json. A drift with the
-// same fingerprint as an existing file is not reported again. -on-drift runs
-// a command with the event file path as its last argument; that is where the
-// agent spawn paths plug in.
+// same fingerprint as an existing file is not reported again.
 //
-// Exit code in single-run mode: 0 no drift, 2 spawn_agent, 3 escalate.
+// Inside GitHub Actions (GITHUB_ACTIONS=true) it also writes the result to
+// the job summary and emits an annotation per change.
+//
+// Exit code in single-run mode: 0 no drift, 2 needs a code fix, 3 needs a human.
 package main
 
 import (
@@ -34,7 +35,6 @@ type options struct {
 	mcpCmd         string
 	baselinePath   string
 	outDir         string
-	onDrift        string
 	updateBaseline bool
 }
 
@@ -48,7 +48,6 @@ func main() {
 	flag.StringVar(&o.mcpCmd, "mcp-cmd", "go run ./cmd/mockmcp", "command that starts the MCP server on stdio")
 	flag.StringVar(&o.baselinePath, "baseline", "baseline/baseline.json", "baseline file")
 	flag.StringVar(&o.outDir, "out", "events", "directory for drift events")
-	flag.StringVar(&o.onDrift, "on-drift", "", "command to run for each new drift event (event path appended)")
 	flag.BoolVar(&o.updateBaseline, "update-baseline", false, "record the current state as the baseline and exit")
 	interval := flag.Duration("interval", 0, "poll interval; 0 runs once")
 	flag.Parse()
@@ -121,6 +120,11 @@ func check(ctx context.Context, o options) (detector.DriftEvent, error) {
 	ev.ServerLogs = tail(stderr.String(), 4000)
 
 	log.Print(ev.Summary)
+	if os.Getenv("GITHUB_ACTIONS") == "true" {
+		if err := reportToGitHub(ev); err != nil {
+			log.Printf("writing GitHub summary: %v", err)
+		}
+	}
 	if ev.Action == detector.ActionNone {
 		return ev, nil
 	}
@@ -137,15 +141,25 @@ func check(ctx context.Context, o options) (detector.DriftEvent, error) {
 		return ev, err
 	}
 	log.Printf("drift event written: %s", path)
-	if o.onDrift != "" {
-		args := append(strings.Fields(o.onDrift), path)
-		hook := exec.CommandContext(ctx, args[0], args[1:]...)
-		hook.Stdout, hook.Stderr = os.Stdout, os.Stderr
-		if err := hook.Run(); err != nil {
-			log.Printf("on-drift hook failed: %v", err)
-		}
-	}
 	return ev, nil
+}
+
+// reportToGitHub emits annotations and appends to the job summary.
+func reportToGitHub(ev detector.DriftEvent) error {
+	for _, a := range ev.Annotations() {
+		fmt.Println(a)
+	}
+	path := os.Getenv("GITHUB_STEP_SUMMARY")
+	if path == "" {
+		return nil
+	}
+	f, err := os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	_, err = f.WriteString(ev.Markdown())
+	return err
 }
 
 func tail(s string, n int) string {

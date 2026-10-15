@@ -39,4 +39,7 @@ func main() {
 	defer resp.Body.Close()
 	out, _ := io.ReadAll(resp.Body)
 	fmt.Println(resp.Status, string(out))
+	if resp.StatusCode >= 300 {
+		os.Exit(1)
+	}
 }
