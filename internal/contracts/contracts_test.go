@@ -4,9 +4,9 @@ import (
 	"context"
 	"testing"
 
-	"github.com/revolutionrace/mcp-drift-investigation/internal/contracts"
-	"github.com/revolutionrace/mcp-drift-investigation/internal/mockapi"
-	"github.com/revolutionrace/mcp-drift-investigation/internal/testenv"
+	"github.com/SebbeJohansson/mcp-drift-investigation/internal/contracts"
+	"github.com/SebbeJohansson/mcp-drift-investigation/internal/mockapi"
+	"github.com/SebbeJohansson/mcp-drift-investigation/internal/testenv"
 )
 
 func TestContractsPassWithoutChaos(t *testing.T) {

@@ -7,9 +7,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/SebbeJohansson/mcp-drift-investigation/internal/mockapi"
+	"github.com/SebbeJohansson/mcp-drift-investigation/internal/shopmcp"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
-	"github.com/revolutionrace/mcp-drift-investigation/internal/mockapi"
-	"github.com/revolutionrace/mcp-drift-investigation/internal/shopmcp"
 )
 
 // Timeout is the HTTP timeout used by the MCP server and detector in tests.

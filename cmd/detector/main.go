@@ -25,8 +25,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/SebbeJohansson/mcp-drift-investigation/internal/detector"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
-	"github.com/revolutionrace/mcp-drift-investigation/internal/detector"
 )
 
 type options struct {

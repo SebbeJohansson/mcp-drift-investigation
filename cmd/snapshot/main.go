@@ -10,8 +10,8 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/SebbeJohansson/mcp-drift-investigation/internal/shopmcp"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
-	"github.com/revolutionrace/mcp-drift-investigation/internal/shopmcp"
 )
 
 const schemaDir = "internal/contracts/schemas"

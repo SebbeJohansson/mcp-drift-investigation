@@ -1,4 +1,4 @@
-module github.com/revolutionrace/mcp-drift-investigation
+module github.com/SebbeJohansson/mcp-drift-investigation
 
 go 1.25.0
 

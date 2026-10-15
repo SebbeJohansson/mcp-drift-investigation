@@ -6,7 +6,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/revolutionrace/mcp-drift-investigation/internal/mockapi"
+	"github.com/SebbeJohansson/mcp-drift-investigation/internal/mockapi"
 )
 
 func main() {

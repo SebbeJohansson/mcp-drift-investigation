@@ -4,9 +4,9 @@ import (
 	"context"
 	"testing"
 
-	"github.com/revolutionrace/mcp-drift-investigation/internal/detector"
-	"github.com/revolutionrace/mcp-drift-investigation/internal/mockapi"
-	"github.com/revolutionrace/mcp-drift-investigation/internal/testenv"
+	"github.com/SebbeJohansson/mcp-drift-investigation/internal/detector"
+	"github.com/SebbeJohansson/mcp-drift-investigation/internal/mockapi"
+	"github.com/SebbeJohansson/mcp-drift-investigation/internal/testenv"
 )
 
 func setup(t *testing.T) (testenv.Env, detector.Config, detector.Baseline) {
