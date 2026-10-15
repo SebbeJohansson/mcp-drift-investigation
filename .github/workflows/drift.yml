@@ -16,9 +16,6 @@ on:
 permissions:
   contents: read
 
-concurrency:
-  group: drift-check
-
 jobs:
   detect:
     runs-on: ubuntu-latest
